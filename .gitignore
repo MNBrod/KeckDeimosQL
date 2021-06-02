@@ -1,4 +1,4 @@
 /build
 /dist
 .vscode
-*.egg
+keckdeimosql.egg-info
