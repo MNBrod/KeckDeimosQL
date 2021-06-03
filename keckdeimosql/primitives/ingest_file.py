@@ -28,6 +28,8 @@ class ingest_file(BasePrimitive):
             out_args.name = self.action.args.name
             out_args.imtype = self._get_keyword("IMTYPE")
             out_args.koaid = self._get_keyword("KOAID")
+
+            return out_args
     
     def _fits_header_reader(self, filename):
         try:
