@@ -1,18 +1,14 @@
 from keckdrpframework.core.framework import Framework
 from keckdrpframework.config.framework_config import ConfigClass
-from keckdrpframework.models.arguments import Arguments
 from keckdrpframework.utils.drpf_logger import getLogger
 
-from keckdeimosql.pipelines.pipeline import PypeItPipeline
+from KeckDeimosQL.keckdeimosql.pipelines.pipeline import PypeItPipeline
 import logging.config
 
-import subprocess
-import time
 import argparse
 import sys
 import traceback
 import os
-import pkg_resources
 
 def _parse_arguments(in_args: list) -> argparse.Namespace:
     description = "KCWI pipeline CLI"
@@ -51,6 +47,8 @@ def _parse_arguments(in_args: list) -> argparse.Namespace:
 def main():
 
     args = _parse_arguments(sys.argv)
+
+    # Make the output directory
 
     framework_config_file = "../configs/framework.cfg"
 
