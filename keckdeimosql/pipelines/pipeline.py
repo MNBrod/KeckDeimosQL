@@ -59,6 +59,15 @@ class PypeItPipeline(BasePipeline):
         for cal_type in self.cal_types:
             self.cals[cal_type] = 0
 
+        self.minimums = {
+            "arclamp": context.config.params.min_arc,
+            "lampflat": context.config.params.min_lamp,
+            "bias": context.config.params.min_bias,
+            "twiflat": context.config.params.min_twi,
+            "dark": context.config.params.min_dark,
+            "domeflat": context.config.params.min_dome
+        }
+
         self.minimum_calibrations_met = False
 
     def action_planner(self, action, context):
@@ -132,9 +141,7 @@ class PypeItPipeline(BasePipeline):
         Returns True if there are an acceptable number of calibration frames in
         this directory.
         """
-        return self.num_bias >= context.config.params.min_bias and \
-                self.num_dark >= context.config.params.min_dark and \
-                self.num_arc >= context.config.params.min_arc and \
-                self.num_twiflat >= context.config.params.min_twi and \
-                self.num_domeflat >= context.config.params.min_dome and \
-                self.num_lampflat >= context.config.params.min_lamp
+        for key in self.cals.keys():
+            if self.cals[key] < self.minimums[key]:
+                return False
+        return True
