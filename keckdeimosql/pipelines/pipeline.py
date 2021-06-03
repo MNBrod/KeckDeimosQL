@@ -21,6 +21,9 @@ class PypeItPipeline(BasePipeline):
                              None),
         "process_science":  ("pypeit_process_science",
                              "pypeit_process_science_started",
+                             "AlertRTI"),
+        "AlertRTI":         ("SendHTTP",
+                             "alerting_rti",
                              None)
     }
 
