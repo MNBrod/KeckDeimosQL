@@ -3,3 +3,4 @@
 .vscode
 keckdeimosql.egg-info
 *.log
+__pycache__
