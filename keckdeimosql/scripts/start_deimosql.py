@@ -22,14 +22,20 @@ def _parse_arguments(in_args: list) -> argparse.Namespace:
                                      description=description)
     parser.add_argument('-d', '--directory', dest="dirname", type=str,
                         help="Input directory", nargs='?', default=None)
+    parser.add_argument('--force', dest="force", help="Ingest science files"
+                                                    "regardless of calib count",
+                        action="store_true")
+    parser.add_argument('--no-clobber', dest='no_clobber',
+                         help="If more than the minimum calibrations are"
+                                "provided, don't update the initial processing"
+                                "with new files",
+                         action="store_true")
     # after ingesting the files,
     # do we want to continue monitoring the directory?
     parser.add_argument('-m', '--monitor', dest="monitor",
                         help='Continue monitoring the directory '
                              'after the initial ingestion',
                         action='store_true', default=False)
-
-
     parser.add_argument("-w", "--wait_for_event", dest="wait_for_event",
                         action="store_true", help="Wait for events")
     parser.add_argument("-W", "--continue", dest="continuous",
@@ -61,6 +67,8 @@ def main():
         # add this line ONLY if you are using a local logging config file
         logging.config.fileConfig(framework_logcfg)
         framework.config.params = ql_config
+        framework.config.force = args.force
+        framework.config.no_clobber = args.no_clobber
     except Exception as e:
         print("Failed to initialize framework, exiting ...", e)
         traceback.print_exc()
