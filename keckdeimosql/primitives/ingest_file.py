@@ -36,7 +36,9 @@ class ingest_file(BasePrimitive):
             print(e)
             raise e
         
-        return hdul[0].header
+        header = hdul[0].header
+        hdul.close()
+        return header
     
     def _get_keyword(self, key):
         try:
