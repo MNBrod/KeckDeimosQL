@@ -2,13 +2,14 @@ from keckdrpframework.core.framework import Framework
 from keckdrpframework.config.framework_config import ConfigClass
 from keckdrpframework.utils.drpf_logger import getLogger
 
-from KeckDeimosQL.keckdeimosql.pipelines.pipeline import PypeItPipeline
+from keckdeimosql.pipelines.pipeline import PypeItPipeline
 import logging.config
 
 import argparse
 import sys
 import traceback
 import os
+import pkg_resources
 
 def _parse_arguments(in_args: list) -> argparse.Namespace:
     description = "KCWI pipeline CLI"
@@ -18,6 +19,8 @@ def _parse_arguments(in_args: list) -> argparse.Namespace:
                                      description=description)
     parser.add_argument('-d', '--directory', dest="dirname", type=str,
                         help="Input directory", nargs='?', default=None)
+
+
     parser.add_argument('--force', dest="force", help="Ingest science files"
                                                     "regardless of calib count",
                         action="store_true")
@@ -37,9 +40,6 @@ def _parse_arguments(in_args: list) -> argparse.Namespace:
     parser.add_argument("-W", "--continue", dest="continuous",
                         action="store_true",
                         help="Continue processing, wait for ever")
-    parser.add_argument("-s", "--start_queue_manager_only",
-                        dest="queue_manager_only", action="store_true",
-                        help="Starts queue manager only, no processing",)
 
     out_args = parser.parse_args(in_args[1:])
     return out_args
@@ -50,9 +50,12 @@ def main():
 
     # Make the output directory
 
+    pkg = 'keckdeimosql'
+
     framework_config_file = "../configs/framework.cfg"
 
-    framework_logcfg = '../configs/logger.cfg'
+    framework_logcfg = 'configs/logger.cfg'
+    log_file_path = pkg_resources.resource_filename(pkg, framework_logcfg)
 
     config_file = '../configs/qldeimos.cfg'
     ql_config = ConfigClass(config_file, default_section='QL_PARAMS')
@@ -62,8 +65,7 @@ def main():
 
     try:
         framework = Framework(PypeItPipeline, framework_config_file)
-        # add this line ONLY if you are using a local logging config file
-        logging.config.fileConfig(framework_logcfg)
+        logging.config.fileConfig(log_file_path)
         framework.config.params = ql_config
         framework.config.force = args.force
         framework.config.no_clobber = args.no_clobber
@@ -75,6 +77,14 @@ def main():
                                  name="DRPF")
 
     framework.logger.info("Framework initialized")
+
+    if args.monitor is not None:
+        if args.dirname is not None:
+            directory = args.dirname
+        else:
+            directory = os.getcwd()
+
+        framework.ingest_data(directory, None, args.monitor)
 
     framework.start(args.queue_manager_only,
                     args.wait_for_event, args.continuous)
