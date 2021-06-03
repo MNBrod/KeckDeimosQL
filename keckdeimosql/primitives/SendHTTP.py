@@ -5,6 +5,10 @@ import time
 from keckdrpframework.primitives.base_primitive import BasePrimitive
 
 class SendHTTP(BasePrimitive):
+    """
+    Sends an HTTP GET request to the url in the config file in compliance with
+    the RTI API.
+    """
 
     def __init__(self, action, context):
         BasePrimitive.__init__(self, action, context)
