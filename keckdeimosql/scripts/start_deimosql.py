@@ -1,3 +1,10 @@
+"""
+Entry point for launching the pipeline. Handles command line input/parsing,
+initializing the framework, and launching the action planner.
+
+author: MBrodheim
+"""
+
 from keckdrpframework.core.framework import Framework
 from keckdrpframework.config.framework_config import ConfigClass
 from keckdrpframework.utils.drpf_logger import getLogger

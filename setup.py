@@ -1,3 +1,9 @@
+"""
+Setup information for the pipeline. 
+
+author: MBrodheim
+"""
+
 from setuptools import setup, find_packages
 
 
@@ -9,8 +15,6 @@ AUTHOR_EMAIL = "mbrodheim@keck.hawaii.edu"
 LICENSE = "BSD 3-Clause"
 DESCRIPTION = "Package for running PypeIt's quick look functions for DEIMOS"
 
-# scripts = [fname for fname in glob.glob(os.path.join('scripts', '*'))
-#            if os.path.basename(fname) != 'README.rst']
 scripts = []
 # Define entry points for command-line scripts
 entry_points = {
@@ -31,5 +35,4 @@ setup(name=NAME,
       entry_points=entry_points,
       install_requires=['pypeit',
                         'keckdrpframework']
-    #   python_requires="~=3.7"
       )

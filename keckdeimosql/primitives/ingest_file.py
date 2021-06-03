@@ -1,3 +1,7 @@
+"""
+author: MBrodheim
+"""
+
 from keckdrpframework.models.arguments import Arguments
 from keckdrpframework.primitives.base_primitive import BasePrimitive
 from astropy.io import fits
@@ -5,7 +9,7 @@ from astropy.nddata import CCDData
 
 class ingest_file(BasePrimitive):
     """
-    Calls the process_calibs function from ql_keck_deimos.py in PypeIt
+    Takes in a filename and loads the argument with information about the frame
     """
 
     def __init__(self, action, context):

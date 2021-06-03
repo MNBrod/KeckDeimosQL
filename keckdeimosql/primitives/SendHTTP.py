@@ -1,3 +1,7 @@
+"""
+author: MBrodheim
+"""
+
 import os
 import requests
 import time

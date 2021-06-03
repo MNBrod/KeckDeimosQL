@@ -1,3 +1,7 @@
+"""
+author: MBrodheim
+"""
+
 from keckdrpframework.primitives.base_primitive import BasePrimitive
 from pypeit.scripts import ql_keck_deimos
 
