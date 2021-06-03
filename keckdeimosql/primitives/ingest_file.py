@@ -26,7 +26,7 @@ class ingest_file(BasePrimitive):
             self.header = self._fits_header_reader(self.name)
 
             out_args.name = self.action.args.name
-            out_args.imtype = self._get_keyword("IMTYPE")
+            out_args.imtype = self._get_keyword("KOAIMTYP")
             out_args.koaid = self._get_keyword("KOAID")
 
             return out_args
