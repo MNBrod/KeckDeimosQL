@@ -41,6 +41,12 @@ class PypeItPipeline(BasePipeline):
                              None)
     }
 
+    # List of all the types of calibrations we will encounter
+    cal_types = [
+        "lampflat",
+        "arclamp"
+    ]
+
     def __init__(self, context: ProcessingContext):
         """
         Constructor
@@ -49,12 +55,9 @@ class PypeItPipeline(BasePipeline):
         self.cnt = 0
         
         # Stores the number of each calibration file that have been ingested
-        self.num_twiflat = 0
-        self.num_bias = 0
-        self.num_dark = 0
-        self.num_lampflat = 0
-        self.num_domeflat = 0
-        self.num_arc = 0
+        self.cals = {}
+        for cal_type in self.cal_types:
+            self.cals[cal_type] = 0
 
         self.minimum_calibrations_met = False
 
@@ -71,20 +74,12 @@ class PypeItPipeline(BasePipeline):
         
         # Record the time of ingestion for RTI metrics
         action.args.ingest_time = datetime.utcnow()
-
-        # List of all the types of calibrations we will encounter
-        calibration_types = ["BIAS",
-                             "DARK",
-                             "TWIFLAT", 
-                             "DOMEFLAT", 
-                             "FLATLAMP",
-                             "ARCLAMP"]
         
-        if action.args.imtype in calibration_types:
+        if action.args.imtype in self.cal_types:
             
             self._handle_calib(action, context)
 
-        elif action.args.imtype == "OBJECT":
+        elif action.args.imtype == "object":
             
             self._handle_science(action, context)
         
@@ -109,18 +104,8 @@ class PypeItPipeline(BasePipeline):
         imtype = action.args.imtype
 
         # Add to the appropriate calib count
-        if imtype == "BIAS":
-            self.num_bias += 1
-        elif imtype == "DARK":
-            self.num_dark += 1
-        elif imtype == "TWIFLAT":
-            self.num_twiflat += 1
-        elif imtype == "DOMEFLAT":
-            self.num_domeflat += 1
-        elif imtype == "FLATLAMP":
-            self.num_lampflat += 1
-        elif imtype == "ARCLAMP":
-            self.num_arc += 1
+        if imtype in self.cal_types:
+            self.cals[imtype] += 1
         else:
             self.logger.error(f"Unexpected calib type: {imtype}")
             return
