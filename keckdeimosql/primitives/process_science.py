@@ -4,7 +4,6 @@ from pypeit.scripts import ql_keck_deimos
 class process_science(BasePrimitive):
     """
     Calls the process_calibs function from ql_keck_deimos.py in PypeIt
-
     """
 
     def __init__(self, action, context):
