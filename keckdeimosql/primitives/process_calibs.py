@@ -15,9 +15,9 @@ class process_calibs(BasePrimitive):
         self.logger = context.pipeline_logger
 
     def _perform(self):
-        raw_path = self.context.config.pypeit.raw_path
-        redux_path = self.context.config.pypeit.redux_path
-        file_root = self.context.config.pypeit.root
+        raw_path = self.context.config.params.cwd
+        redux_path = self.context.config.params.redux_path
+        file_root = self.context.config.params.root
         det_num = self.context.config.params.det_num
         
         cmds = [raw_path, '--calibs_only',
