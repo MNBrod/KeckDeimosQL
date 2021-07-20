@@ -15,6 +15,17 @@ class ingest_file(BasePrimitive):
     def __init__(self, action, context):
         BasePrimitive.__init__(self, action, context)
         self.logger = context.pipeline_logger
+    
+    def _pre_condition(self):
+        try:
+            if self.action.args.name.startswith(self.context.config.root):
+                return True
+            self.logger.error(f"File does not match DEIMOS name convention: {self.action.args.name}")
+            return False
+        except TypeError as e:
+            self.logger.error("Failed to load filename")
+            self.logger.error(e)
+            return False
 
     def _perform(self):
             # if self.context.data_set is None:

@@ -19,7 +19,7 @@ Default Usage
 
 The program can be launched with 
 
-``start_deimos_ql -mw -d [DIRECTORY]``
+``start_deimos_ql -d [DIRECTORY]``
 
 where ``[DIRECTORY]`` is the filepath (absolute or relative) to the
 directory that should be monitored. This will almost always be an RTI

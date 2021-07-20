@@ -19,7 +19,7 @@ import os
 import pkg_resources
 
 def _parse_arguments(in_args: list) -> argparse.Namespace:
-    description = "KCWI pipeline CLI"
+    description = "Deimos QL Launcher"
 
     # this is a simple case where we provide a frame and a configuration file
     parser = argparse.ArgumentParser(prog=f"{in_args[0]}",
@@ -38,18 +38,23 @@ def _parse_arguments(in_args: list) -> argparse.Namespace:
                          action="store_true")
     # after ingesting the files,
     # do we want to continue monitoring the directory?
-    parser.add_argument('-m', '--monitor', dest="monitor",
-                        help='Continue monitoring the directory '
-                             'after the initial ingestion',
-                        action='store_true', default=False)
-    parser.add_argument("-w", "--wait_for_event", dest="wait_for_event",
-                        action="store_true", help="Wait for events")
-    parser.add_argument("-W", "--continue", dest="continuous",
-                        action="store_true",
-                        help="Continue processing, wait for ever")
+    # parser.add_argument('-m', '--monitor', dest="monitor",
+    #                     help='Continue monitoring the directory '
+    #                          'after the initial ingestion',
+    #                     action='store_true', default=False)
+    # parser.add_argument("-w", "--wait_for_event", dest="wait_for_event",
+    #                     action="store_true", help="Wait for events")
+    # parser.add_argument("-W", "--continue", dest="continuous",
+    #                     action="store_true",
+    #                     help="Continue processing, wait for ever")
 
     out_args = parser.parse_args(in_args[1:])
     return out_args
+
+def check_directory(directory):
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
+        print("Directory %s has been created" % directory)
 
 def main():
 
@@ -64,8 +69,9 @@ def main():
     framework_logcfg = 'configs/logger.cfg'
     log_file_path = pkg_resources.resource_filename(pkg, framework_logcfg)
 
-    config_file = '../configs/qldeimos.cfg'
-    ql_config = ConfigClass(config_file, default_section='QL_PARAMS')
+    config_file = 'configs/qldeimos.cfg'
+    config_filepath = pkg_resources.resource_filename(pkg, config_file)
+    ql_config = ConfigClass(config_filepath, default_section='QL_PARAMS')
 
     # Add current working directory to config info
     ql_config.cwd = os.getcwd()
@@ -83,18 +89,21 @@ def main():
     framework.logger = getLogger(framework_logcfg,
                                  name="DRPF")
 
+    #Check if the directories exist! TODO
+
     framework.logger.info("Framework initialized")
 
-    if args.monitor is not None:
-        if args.dirname is not None:
-            directory = args.dirname
-        else:
-            directory = os.getcwd()
+    if args.dirname is not None:
+        directory = args.dirname
+    else:
+        directory = os.getcwd()
 
-        framework.ingest_data(directory, None, args.monitor)
+    framework.ingest_data(directory, None, True)
 
-    framework.start(args.queue_manager_only,
-                    args.wait_for_event, args.continuous)
+    # framework.start(args.queue_manager_only,
+    #                 args.wait_for_event, args.continuous)
+    framework.start(qm_only=False, ingest_data_only=False, wait_for_event=True,
+                        continuous=True)
 
 
 if __name__ == "__main__":

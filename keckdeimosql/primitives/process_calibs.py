@@ -15,10 +15,10 @@ class process_calibs(BasePrimitive):
         self.logger = context.pipeline_logger
 
     def _perform(self):
-        raw_path = self.context.config.params.cwd
-        redux_path = self.context.config.params.redux_path
-        file_root = self.context.config.params.root
-        det_num = self.context.config.params.det_num
+        raw_path = self.context.config.cwd
+        redux_path = self.context.config.redux_path
+        file_root = self.context.config.root
+        det_num = self.context.config.det_num
         
         cmds = [raw_path, '--calibs_only',
             f'--root={file_root}', f'-d={det_num}', f'--redux_path={redux_path}']

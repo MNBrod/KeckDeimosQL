@@ -27,7 +27,7 @@ class PypeItPipeline(BasePipeline):
     name = 'DeimosQLReductionLauncher'
 
     event_table = {
-        "new_file" :        ("ingest_file",
+        "next_file" :        ("ingest_file",
                              "ingest_file_started",
                              "action_planner"),
         "process_calibs":   ("process_calibs",
@@ -60,12 +60,12 @@ class PypeItPipeline(BasePipeline):
             self.cals[cal_type] = 0
 
         self.minimums = {
-            "arclamp": context.config.params.min_arc,
-            "lampflat": context.config.params.min_lamp,
-            "bias": context.config.params.min_bias,
-            "twiflat": context.config.params.min_twi,
-            "dark": context.config.params.min_dark,
-            "domeflat": context.config.params.min_dome
+            "arclamp": context.config.min_arc,
+            "lampflat": context.config.min_lamp,
+            "bias": context.config.min_bias,
+            "twiflat": context.config.min_twi,
+            "dark": context.config.min_dark,
+            "domeflat": context.config.min_dome
         }
 
         self.minimum_calibrations_met = False
@@ -126,6 +126,9 @@ class PypeItPipeline(BasePipeline):
             self.minimum_calibrations_met = True
             self.logger.info("Minimum calibration requirements met")
             context.push_event("process_calib", None)
+        else:
+            self.logger.info("Waiting for more calibrations:\n")
+            self.print_calibration_counts()
 
 
     def _handle_science(self, action, context):
@@ -145,3 +148,7 @@ class PypeItPipeline(BasePipeline):
             if self.cals[key] < self.minimums[key]:
                 return False
         return True
+
+    def print_calibration_counts(self):
+        for key in self.cals.keys():
+            self.logger.info(f"\t{key}: {self.cals[key]}")
