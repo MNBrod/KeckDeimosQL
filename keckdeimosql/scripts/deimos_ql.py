@@ -54,7 +54,7 @@ class logger():
             print(str)
 
 # Command line execution
-if __name__ == '__main__':
+def main():
 
     raw_path = os.path.join(os.getenv("PYPEIT_DEV"), 'DEIMOS_QL_TST', 'raw')
     redux_path = os.path.join(os.getenv("PYPEIT_DEV"), 'DEIMOS_QL_TST')
@@ -94,3 +94,6 @@ if __name__ == '__main__':
         
         log.print(f'running one_slit with {parser.directory}, {frame}, {parser.slit_spat}, {parser.out_path}')
         one_slit(parser.directory, frame, parser.slit_spat, parser.out_path)
+
+        if __name__ == '__main__:
+            main()
