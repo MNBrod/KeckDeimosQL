@@ -2,7 +2,6 @@
 import os
 import argparse
 from pathlib import Path
-from re import L
 
 from pypeit.scripts import ql_keck_deimos
 
@@ -95,5 +94,5 @@ def main():
         log.print(f'running one_slit with {parser.directory}, {frame}, {parser.slit_spat}, {parser.out_path}')
         one_slit(parser.directory, frame, parser.slit_spat, parser.out_path)
 
-        if __name__ == '__main__:
+        if __name__ == '__main__':
             main()
