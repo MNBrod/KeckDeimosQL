@@ -7,18 +7,20 @@ from keckdrpframework.primitives.base_primitive import BasePrimitive
 from astropy.io import fits
 from astropy.nddata import CCDData
 
-class ingest_file(BasePrimitive):
+import os
+
+class IngestFile(BasePrimitive):
     """
     Takes in a filename and loads the argument with information about the frame
     """
 
     def __init__(self, action, context):
         BasePrimitive.__init__(self, action, context)
-        self.logger = context.pipeline_logger
+        self.logger = context.logger
     
     def _pre_condition(self):
         try:
-            if self.action.args.name.startswith(self.context.config.root):
+            if os.path.basename(self.action.args.name).startswith(self.context.config.params.root):
                 return True
             self.logger.error(f"File does not match DEIMOS name convention: {self.action.args.name}")
             return False

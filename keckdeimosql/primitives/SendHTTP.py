@@ -16,7 +16,7 @@ class SendHTTP(BasePrimitive):
 
     def __init__(self, action, context):
         BasePrimitive.__init__(self, action, context)
-        self.logger = context.pipeline_logger
+        self.logger = context.logger
     
     def _pre_condition(self):
         self.user = self.config.rti_user
@@ -27,7 +27,8 @@ class SendHTTP(BasePrimitive):
         return True
 
     def _perform(self):
-
+        
+        return
         if not self.action.args.koaid:
             self.logger.error(f"Encountered a file with no KOA ID: {self.action.args.name}")
             return self.action.args

@@ -12,6 +12,14 @@ from keckdrpframework.utils.drpf_logger import getLogger
 from keckdeimosql.pipelines.pipeline import PypeItPipeline
 import logging.config
 
+""" 
+Even though PypeIt is not used in this script, or the pipeline directly, it must
+be imported here, in the main process, in order for the pipeline's subprocesses
+to access it. The primitives are NOT able to import any part of PypeIt without
+this import here.
+"""
+import pypeit
+
 import argparse
 import sys
 import traceback
@@ -64,7 +72,9 @@ def main():
 
     pkg = 'keckdeimosql'
 
-    framework_config_file = "../configs/framework.cfg"
+    framework_config_file = "configs/framework.cfg"
+    framework_config_fullpath = \
+        pkg_resources.resource_filename(pkg, framework_config_file)
 
     framework_logcfg = 'configs/logger.cfg'
     log_file_path = pkg_resources.resource_filename(pkg, framework_logcfg)
@@ -76,8 +86,9 @@ def main():
     # Add current working directory to config info
     ql_config.cwd = os.getcwd()
 
+    
     try:
-        framework = Framework(PypeItPipeline, framework_config_file)
+        framework = Framework(PypeItPipeline, framework_config_fullpath)
         logging.config.fileConfig(log_file_path)
         framework.config.params = ql_config
         framework.config.force = args.force

@@ -19,7 +19,8 @@ scripts = []
 # Define entry points for command-line scripts
 entry_points = {
     'console_scripts': [
-        "start_deimos_ql = keckdeimosql.scripts.start_deimosql:main"
+        "start_deimos_ql = keckdeimosql.scripts.start_deimosql:main",
+        "deimos_ql = keckdeimos.script.deimos_ql:main"
     ]}
 
 setup(name=NAME,

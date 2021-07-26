@@ -24,16 +24,19 @@ class PypeItPipeline(BasePipeline):
     quicklook science reduction step from PypeIt.
     """
 
-    name = 'DeimosQLReductionLauncher'
+    name = 'KeckDeimosQL'
 
     event_table = {
-        "next_file" :        ("ingest_file",
+        "next_file" :        ("IngestFile",
                              "ingest_file_started",
-                             "action_planner"),
-        "process_calibs":   ("process_calibs",
+                             "planner"),
+        "planner":           ("action_planner",
+                              "planning",
+                              None),
+        "process_calibs":   ("ProcessCalibs",
                              "process_calib_started",
                              None),
-        "process_science":  ("process_science",
+        "process_science":  ("ProcessScience",
                              "pypeit_process_science_started",
                              "AlertRTI"),
         "AlertRTI":         ("SendHTTP",
@@ -43,7 +46,7 @@ class PypeItPipeline(BasePipeline):
 
     # List of all the types of calibrations we will encounter
     cal_types = [
-        "lampflat",
+        "flatlamp",
         "arclamp"
     ]
 
@@ -58,17 +61,19 @@ class PypeItPipeline(BasePipeline):
         self.cals = {}
         for cal_type in self.cal_types:
             self.cals[cal_type] = 0
-
-        self.minimums = {
-            "arclamp": context.config.min_arc,
-            "lampflat": context.config.min_lamp,
-            "bias": context.config.min_bias,
-            "twiflat": context.config.min_twi,
-            "dark": context.config.min_dark,
-            "domeflat": context.config.min_dome
-        }
+        self.minimums = None
 
         self.minimum_calibrations_met = False
+
+    def set_min_cals(self, context):
+        self.minimums = {
+            "arclamp": context.config.params.min_arc,
+            "flatlamp": context.config.params.min_lamp,
+            "bias": context.config.params.min_bias,
+            "twiflat": context.config.params.min_twi,
+            "dark": context.config.params.min_dark,
+            "domeflat": context.config.params.min_dome
+        }
 
     def action_planner(self, action, context):
         """
@@ -81,20 +86,25 @@ class PypeItPipeline(BasePipeline):
         except:
             return
         
+        if self.minimums is None:
+            self.set_min_cals(context)
+
         # Record the time of ingestion for RTI metrics
         action.args.ingest_time = datetime.utcnow()
         
         if action.args.imtype in self.cal_types:
             
-            self._handle_calib(action, context)
+            return self._handle_calib(action, context)
 
         elif action.args.imtype == "object":
             
-            self._handle_science(action, context)
+            return self._handle_science(action, context)
         
         else:
         
             self.logger.error(f"Unexpected IMTYPE: {action.args.imtype}")
+        
+            return True
         
     def _handle_calib(self, action, context):
 
@@ -107,8 +117,8 @@ class PypeItPipeline(BasePipeline):
                 self.logger.info("--no-clobber set to true. Ignoring calib")
                 return
             else:
-                context.push_event("process_calib", None)
-                return
+                context.push_event("process_calibs", None)
+                return True
 
         imtype = action.args.imtype
 
@@ -117,7 +127,7 @@ class PypeItPipeline(BasePipeline):
             self.cals[imtype] += 1
         else:
             self.logger.error(f"Unexpected calib type: {imtype}")
-            return
+            return False
 
 
 
@@ -125,18 +135,22 @@ class PypeItPipeline(BasePipeline):
         if self._check_minimum_calibrations_met(context):
             self.minimum_calibrations_met = True
             self.logger.info("Minimum calibration requirements met")
-            context.push_event("process_calib", None)
+            context.push_event("process_calibs", None)
+            return True
         else:
             self.logger.info("Waiting for more calibrations:\n")
             self.print_calibration_counts()
+            return False
 
 
     def _handle_science(self, action, context):
         # If the calibrations have been processed, process this science file
         if not self.minimum_calibrations_met and context.config.force == False:
             self.logger.error("Recieved science frame before minimum calibrations!")
+            return False
         else:
             context.push_event("process_science", action.args)
+            return True
 
 
     def _check_minimum_calibrations_met(self, context):
