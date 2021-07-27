@@ -5,7 +5,6 @@ from pathlib import Path
 
 from pypeit.scripts import ql_keck_deimos
 
-from IPython import embed
 from astropy.io import fits
 
 
@@ -75,7 +74,9 @@ def main():
     afternoon(parser.directory, parser.root, parser.detector, parser.out_path)
 
     if not parser.calibs_only:
-        if parser.frame is None:
+        if parser.frame is None: 
+            # This isn't really useful, just makes sanity checks easier
+            # Selects the first science frame that it finds
             science = []
             for file in Path(parser.directory).glob('*.fits'):
                 with fits.open(file) as h:
@@ -88,6 +89,7 @@ def main():
         else:
             frame = parser.frame
         if parser.slit_spat is None:
+            # Also not very useful: Just takes the first slit it finds
             masters_dir = Path(parser.out_path) / 'keck_deimos_A' / 'Masters'
             print(list(masters_dir.glob('*.fits.gz')))
             master_slit = list(masters_dir.glob('MasterSlits*'))[0]
