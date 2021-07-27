@@ -20,6 +20,7 @@ def afternoon(raw_path, root, detector, redux_path):
 
 def one_slit(raw_path, frame, slit, redux_path):
     slit = f'--slit_spat={slit}'
+    print(slit)
     frame = f'--science={frame}'
     cmds = [raw_path, frame,  slit,
             '--redux_path={}'.format(redux_path)]
@@ -38,10 +39,10 @@ def get_parser():
                         help='Detector number', nargs=1)
     parser.add_argument('-c', '--calibs-only', dest="calibs_only",
                         action="store_true", help='Only process calibrations')
-    parser.add_argument('-o', '--output', dest='out_path', nargs=1)
-    parser.add_argument('-s', '--slit', dest='slit_spat', help='science slit',
-                        nargs=1)
+    parser.add_argument('-o', '--output', dest='out_path', nargs=1, default='./out')
+    parser.add_argument('-s', '--slit', dest='slit_spat', help='science slit')
     parser.add_argument('-l', default=0, dest='log')
+    parser.add_argument('-f', '--frame', dest='frame')
     return parser
 
 class logger():
@@ -59,7 +60,7 @@ def main():
     redux_path = os.path.join(os.getenv("PYPEIT_DEV"), 'DEIMOS_QL_TST')
     
     parser = get_parser().parse_args()
-    log = logger(parser.log)
+    log = logger(int(parser.log))
     
     if 'raw_path' in parser.directory:
         parser.directory = raw_path
@@ -69,27 +70,34 @@ def main():
         parser.out_path = redux_path
         log.print(f'set out_path to {parser.out_path}')
 
+    log.print(f'outdir is {parser.out_path}')
     log.print(f'Parsing afternoon with: {parser.directory}, {parser.root}, {parser.detector}, {parser.out_path}')
     afternoon(parser.directory, parser.root, parser.detector, parser.out_path)
 
     if not parser.calibs_only:
-        
-        science = []
-        for file in Path(parser.directory).glob('*.fits'):
-            with fits.open(file) as h:
-                if ['arc', 'IntFlat'] not in h.header['OBJECT']:
-                    science.append(file)
-        log.print(f'Found science files: {science}')
-        frame = science[0]
-        log.print(f'Using {frame}')
+        if parser.frame is None:
+            science = []
+            for file in Path(parser.directory).glob('*.fits'):
+                with fits.open(file) as h:
+                    obj = h[0].header['OBJECT']
+                    if 'IntFlat' not in obj and 'arc' not in obj:
+                        science.append(file)
+            log.print(f'Found science files: {science}')
+            frame = science[0]
+            log.print(f'Using {frame}')
+        else:
+            frame = parser.frame
         if parser.slit_spat is None:
             masters_dir = Path(parser.out_path) / 'keck_deimos_A' / 'Masters'
-            master_slit = list(masters_dir.glob('MasterSlits'))[0]
+            print(list(masters_dir.glob('*.fits.gz')))
+            master_slit = list(masters_dir.glob('MasterSlits*'))[0]
             log.print(f'Using slit file {master_slit}')
 
             with fits.open(master_slit) as h:
                 parser.slit_spat = f"{parser.detector}:{h['SLITS'].data[0][0]}"
             log.print(f'slit spat id is {parser.slit_spat}')
+        else:
+            parser.slit_spat = f"{parser.detector}:{parser.slit_spat}"
         
         log.print(f'running one_slit with {parser.directory}, {frame}, {parser.slit_spat}, {parser.out_path}')
         one_slit(parser.directory, frame, parser.slit_spat, parser.out_path)
